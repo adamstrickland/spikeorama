@@ -20,6 +20,9 @@ Flink is configured to run a job that watches the CDC topic for one of the
 tables (`monolith.public.wildapp_primary`), transforms it to a Protobuf-managed
 object, and then serializes the object to a "fact" topic (`wildapp.primary.facts`).
 
+The key code to look at, i.e. what does all the work inside of Flink, is the
+[StaticTransformJob](https://github.com/adamstrickland/spikeorama/blob/fact-spike/spikes/rt-cdc-to-fact-enrichment/opt/abstractfactory/src/main/java/abstractfactory/StaticTransformJob.java).
+
 ```mermaid
 sequenceDiagram
   actor ds as django-seed
@@ -89,6 +92,9 @@ sequenceDiagram
     docker compose up -d
     ```
 
+    Note that it can take some time for these to come up; you may need to restart
+    Debezium (for instance) *after* the broker has fully initialized.
+
 1. Set up the database and the Django project.
 
     ```sh
@@ -97,9 +103,9 @@ sequenceDiagram
 
     psql \
       postgresql://postgres:postgres@localhost:$(docker compose port postgres 5432 | cut -d: -f2)/postgres \
-      -c 'create database "wildapp";'
+      -c 'create database "monolith";'
 
-    export DATABASE_URL=postgresql://postgres:postgres@localhost:$(docker compose port postgres 5432 | cut -d: -f2)/wildapp
+    export DATABASE_URL=postgresql://postgres:postgres@localhost:$(docker compose port postgres 5432 | cut -d: -f2)/monolith
 
     poetry run python manage.py makemigrations
     poetry run python manage.py migrate
@@ -109,15 +115,85 @@ sequenceDiagram
 
 1. Configure Debezium.
 
-    Note that there doesn't appear to be a good way for this file to be passed
-    to the container; the API needs to be invoked, and passed the configuration
-    file. This is done with the following incantation:
+    First, confirm that Debezium is up and running:
+
+    ```sh
+    curl -XGET \
+      -H"Content-Type: application/json" \
+      http://$(docker compose port debezium 8083)/connectors
+    ```
+
+    The response should be an empty array (`[]`). If you get an error, double-check
+    that the broker is initialized. Assuming it is, restart Debezium:
+
+    ```sh
+    docker compose restart debezium
+    ```
+
+    Now tail the logs, ...
+
+    ```sh
+    docker compose logs -f debezium
+    ```
+
+    ...and wait for it to fully initialize before configuring the connector with
+    the next curl command. You're looking for the log line `Kafka Connect started`.
 
     ```sh
     curl -XPOST \
       -d @./src/main/dbz/cdc-connector.json \
       -H"Content-Type: application/json" \
       http://$(docker compose port debezium 8083)/connectors
+    ```
+
+    Note that there doesn't appear to be a good way for this file to be passed
+    to the container and avoid all this tomfoolery. AFAIK the API needs to be
+    invoked, and passed the configuration file. If you find a way to inject the
+    configuration file directly, please LMK.
+
+1. Now build the Flink job and upload it.
+
+    ```sh
+    cd opt/abstractfactory
+
+    gradle build
+    ```
+
+    Now upload the Jar.
+
+    ```sh
+    curl -XPOST \
+      -H "Expect:" \
+      -F "jarfile=@build/libs/abstractfactory.jar" \
+      http://$(docker compose port jobmanager 8081)/jars/upload
+
+    ```
+
+    Note that you may need to restart Flink.
+
+    ```sh
+    docker compose restart jobmanager
+    ```
+
+    Again, tail the log (`docker compose logs -f jobmanager`)and look for
+    confirmation that Flink has *fully* restarted (it can take a minute or two).
+    You're looking for a message indicating that the REST API has started; it
+    should be something like `Rest endpoint listening at 0.0.0.0:8081`. On my
+    distribution it was about 15 lines up from the bottom from when the logs
+    stopped scrolling. Now retry the upload again, if needed.
+
+1. Run the Flink job.
+
+    > **NOTE: I do not have this last bit working yet via `curl`, although the
+    > Proof-of-Concept does work.
+
+    ```sh
+    curl -XGET \
+      http://$(docker compose port jobmanager 8081)/jars \
+      | jq -r '.files[] | select(.name == "abstractfactory.jar").id' \
+      | xargs -I_ \
+        curl -XPOST \
+        http://$(docker compose port jobmanager 8081)/jars/_/run
     ```
 
 ### Running

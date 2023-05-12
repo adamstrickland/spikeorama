@@ -42,10 +42,10 @@ public class StaticTransformJob implements TransformJob {
         .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
         .build();
 
-    DataStream<String> outStream = streamSource.map(new  MapFunction<String, String>() {
+    DataStream<String> outStream = streamSource.map(new MapFunction<String, String>() {
       @Override
       public String map(String in) throws Exception {
-        log.info("RECV: "+in);
+        // log.info("RECV: "+in);
 
         DocumentContext ctx = JsonPath.parse(in);
 
@@ -62,7 +62,7 @@ public class StaticTransformJob implements TransformJob {
         JsonFormat.Printer printer = JsonFormat.printer();
         String out = printer.print(primary);
 
-        log.info("SEND: "+out);
+        // log.info("SEND: "+out);
         return out;
       }
     });

@@ -42,6 +42,7 @@ public class ConfiguredTransformJob implements TransformJob {
     var cl = this.getClass().getClassLoader();
     this.configuration = mapper.readValue(cl.getResourceAsStream(configFile), Configuration.class);
   }
+
   @Override
   @SneakyThrows
   public void configure(StreamExecutionEnvironment env, String bootstrapServers) {
@@ -68,10 +69,10 @@ public class ConfiguredTransformJob implements TransformJob {
           .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
           .build();
 
-      DataStream<String> outStream = streamSource.map(new  MapFunction<String, String>() {
+      DataStream<String> outStream = streamSource.map(new MapFunction<String, String>() {
         @Override
         public String map(String in) throws Exception {
-          log.info("RECV: "+in);
+          // log.info("RECV: "+in);
 
           DocumentContext ctx = JsonPath.parse(in);
 
@@ -81,8 +82,8 @@ public class ConfiguredTransformJob implements TransformJob {
             try {
               Class<? extends AttributeTransformation<String>> transformationClass = aconfig.getTransformer();
               Constructor<?> c = transformationClass.getConstructor();
-              AttributeTransformation<Serializable> transformation =
-                  (AttributeTransformation<Serializable>) c.newInstance();
+              AttributeTransformation<Serializable> transformation = (AttributeTransformation<Serializable>) c
+                  .newInstance();
 
               Class<? extends Serializable> extractedType = aconfig.getType();
               Object extractedValue = ctx.read(aconfig.expr, extractedType);
@@ -101,7 +102,7 @@ public class ConfiguredTransformJob implements TransformJob {
           JsonFormat.Printer printer = JsonFormat.printer();
           String out = printer.print(message);
 
-          log.info("SEND: "+out);
+          // log.info("SEND: "+out);
           return out;
         }
       });
