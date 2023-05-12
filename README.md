@@ -1,1 +1,3 @@
 # spikeorama
+
+A repository for hosting tech spikes of various origin/needs/destinations...
