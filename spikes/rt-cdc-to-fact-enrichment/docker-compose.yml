@@ -20,7 +20,7 @@ services:
     ports:
       - ${BROKER_HOST_PORT:-29092}:9092
       - 9093
-      - ${BROKER_HOST_PORT:-29094}:9094
+      - ${BROKER_EXTERNAL_PORT:-29094}:9094
       - 9101
     environment:
       CONFLUENT_METRICS_ENABLE: 'true'
