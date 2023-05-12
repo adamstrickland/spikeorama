@@ -1,0 +1,16 @@
+---
+facts:
+  - in:
+      topic: foo
+    out:
+      topic: bar
+      type: PrimaryOuterClass.Primary
+      attributes:
+        - name: canonicalId
+          expr: $.after.canonical_id
+        - name: name
+          expr: $.after.name
+        - name: updatedAt
+          expr: $.ts_ms
+          type: Long
+          tfrm: LongToIso8601AttributeTransformation

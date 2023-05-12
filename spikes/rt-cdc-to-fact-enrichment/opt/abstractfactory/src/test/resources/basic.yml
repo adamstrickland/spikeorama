@@ -1,0 +1,9 @@
+facts:
+  - in:
+      topic: foo
+    out:
+      topic: bar
+      type: PrimaryOuterClass.Primary
+      attributes:
+        - name: canonicalId
+          expr: $.after.canonical_id

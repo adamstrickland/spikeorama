@@ -1,0 +1,8 @@
+__pycache__
+.DS_Store
+.idea
+*.jar
+
+**/gradle-wrapper.jar
+opt/abstractfactory/gradle/wrapper/gradle-wrapper.jar
+

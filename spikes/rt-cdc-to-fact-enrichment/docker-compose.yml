@@ -1,0 +1,130 @@
+---
+
+version: "3.8"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    ports:
+      - 2181
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    platform: linux/amd64
+    restart: always
+
+  broker:
+    image: confluentinc/cp-server:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - ${BROKER_HOST_PORT:-29092}:9092
+      - 9093
+      - ${BROKER_HOST_PORT:-29094}:9094
+      - 9101
+    environment:
+      CONFLUENT_METRICS_ENABLE: 'true'
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:9093
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_SUPPORT_CUSTOMER_ID: anonymous
+      KAFKA_ADVERTISED_LISTENERS: |
+        HOST://localhost:9092,INTERNAL://broker:9093,EXTERNAL://host.docker.internal:9094
+      KAFKA_AUTO_CREATE_TOPICS_ENABLED: "true"
+      KAFKA_BROKER_ID: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_JMX_PORT: 9101
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: |
+        HOST:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_METRIC_REPORTERS: |
+        io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    platform: linux/amd64
+    restart: always
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: password
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    ports:
+      - 5432
+    command:
+      - postgres
+      - "-c"
+      - wal_level=logical
+    platform: linux/amd64
+    restart: always
+
+  debezium:
+    image: debezium/connect
+    ports:
+      - 8083
+    environment:
+      BOOTSTRAP_SERVERS: broker:9093
+      CONFIG_STORAGE_TOPIC: dbz-configs
+      KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      OFFSET_STORAGE_TOPIC: dbz-offsets
+    platform: linux/amd64
+    restart: always
+    depends_on:
+      - zookeeper
+      - broker
+      - postgres
+
+  watch:
+    platform: linux/amd64
+    image: debezium/tooling
+    tty: true
+    command:
+      - bash
+      - -c
+      - |
+        kcat -b $$KAFKA_URL \
+          -u \
+          -G $$RANDOM \
+          -o beginning \
+          $$WATCH_TOPICS \
+        | \
+        jq '.'
+    environment:
+      KAFKA_URL: broker:9093
+      WATCH_TOPICS: |
+         monolith.public.wildapp_primary
+         monolith.public.wildapp_secondary
+         monolith.public.wildapp_tertiary
+    depends_on:
+      - broker
+
+  jobmanager:
+    image: flink:latest
+    ports:
+      - 8081
+    command: jobmanager
+    depends_on:
+      - broker
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+      KAFKA_URL: broker:9093
+
+  taskmanager:
+    image: flink:latest
+    depends_on:
+      - broker
+      - jobmanager
+    command: taskmanager
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2
+      KAFKA_URL: broker:9093

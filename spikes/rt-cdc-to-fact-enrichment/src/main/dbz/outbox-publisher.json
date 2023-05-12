@@ -1,0 +1,23 @@
+{
+  "name": "outbox-publisher",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "postgres",
+    "database.dbname": "dbzspike",
+    "plugin.name": "pgoutput",
+    "table.include.list": "public.event_publisher_outbox",
+    "topic.prefix": "outbox",
+    "transforms": "outbox",
+    "transforms.outbox.route.by.field": "event_topic",
+    "transforms.outbox.route.topic.replacement": "${routedByValue}",
+    "transforms.outbox.table.field.event.id": "id",
+    "transforms.outbox.table.field.event.key": "event_partition_key",
+    "transforms.outbox.table.field.event.payload": "event_data",
+    "transforms.outbox.table.field.event.payload.id": "event_partition_key",
+    "transforms.outbox.type": "io.debezium.transforms.outbox.EventRouter",
+    "value.converter.schemas.enable": false
+  }
+}

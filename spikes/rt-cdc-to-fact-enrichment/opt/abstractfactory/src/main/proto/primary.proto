@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package abstractfactory;
+
+//option java_multiple_files = true;
+//option java_outer_classname = "PrimaryProto";
+//option java_package = "abstractfactory";
+
+message Primary {
+  optional string canonicalId = 1;
+  optional string name = 2;
+  optional string updatedAt = 3;
+}
