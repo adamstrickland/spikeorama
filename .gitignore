@@ -1,0 +1,12 @@
+__pycache__
+.DS_Store
+.idea
+*.jar
+
+**/*.class
+**/build/**
+**/.gradle/*
+**/.project
+**/.settings/*
+**/.classpath
+**/.factorypath
