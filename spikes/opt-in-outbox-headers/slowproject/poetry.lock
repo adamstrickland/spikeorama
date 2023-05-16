@@ -54,6 +54,23 @@ docs = ["furo (>=2021.8.17b43,<2021.9.0)", "sphinx (>=3.5.0)", "sphinx-notfound-
 testing = ["coverage[toml] (>=5.0a4)", "pytest (>=4.6.11)"]
 
 [[package]]
+name = "django-outbox"
+version = "0.1.0"
+description = ""
+category = "main"
+optional = false
+python-versions = "^3.10"
+files = []
+develop = false
+
+[package.dependencies]
+Django = "^4.2.1"
+
+[package.source]
+type = "directory"
+url = "../vendor/django-outbox"
+
+[[package]]
 name = "environ"
 version = "1.0"
 description = "Stack Based Globals Management"
@@ -119,4 +136,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "18029db53e54c411949d63923cd6d0ced8f60bdd2532c77c860d0aa82ebabd9f"
+content-hash = "d0c5cb1290a9e3a65dff68b7ebe3cf5f9c0fd418b6ba70ed70c2ac878ae52913"

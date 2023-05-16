@@ -1,16 +1,14 @@
 [tool.poetry]
-name = "fastproject"
+name = "django-outbox"
 version = "0.1.0"
 description = ""
 authors = ["Adam Strickland <adam.strickland@gmail.com>"]
 readme = "README.md"
+packages = [{include = "outbox"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-django-tof = "^0.3.2"
-django-environ = "^0.10.0"
-psycopg2 = "^2.9.6"
-django-outbox = { path = "../vendor/django-outbox" }
+Django = "^4.2.1"
 
 
 [build-system]

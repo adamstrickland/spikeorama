@@ -1,0 +1,1 @@
+export DATABASE_SCHEMA_USER_PASSWORD_HOST_PORT=postgresql://postgres:postgres@localhost:$(docker compose port postgres 5432 | cut -d: -f2)
