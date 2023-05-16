@@ -15,6 +15,12 @@ from pathlib import Path
 
 env = environ.Env(interpolate=True)
 
+# print("=== SYSTEM PATH ===")
+# import sys
+# for p in sys.path:
+#     print(f"- {p}")
+# print("=== SYSTEM PATH ===")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,6 +37,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'django_outbox'
 
 ]
 

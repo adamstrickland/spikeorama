@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "django-outbox"
+name = "django_outbox"
 version = "0.1.0"
 description = ""
 authors = ["Adam Strickland <adam.strickland@gmail.com>"]
 readme = "README.md"
-packages = [{include = "outbox"}]
+# packages = [{include = "outbox"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
