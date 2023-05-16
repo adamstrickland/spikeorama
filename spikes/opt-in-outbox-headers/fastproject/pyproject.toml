@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "fastproject"
+version = "0.1.0"
+description = ""
+authors = ["Adam Strickland <adam.strickland@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django-tof = "^0.3.2"
+django-environ = "^0.10.0"
+psycopg2 = "^2.9.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

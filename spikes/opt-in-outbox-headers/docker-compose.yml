@@ -1,0 +1,21 @@
+---
+
+version: "3.8"
+
+x-aliases:
+  - &pg postgres
+
+services:
+  postgres:
+    restart: always
+    image: postgres
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: password
+      POSTGRES_PASSWORD: *pg
+      POSTGRES_USER: *pg
+    ports:
+      - &pgp 5432
+    command:
+      - *pg
+      - "-c"
+      - wal_level=logical
