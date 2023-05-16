@@ -10,7 +10,7 @@ python = "^3.10"
 django-tof = "^0.3.2"
 django-environ = "^0.10.0"
 psycopg2 = "^2.9.6"
-django-outbox = { path = "../vendor/django-outbox" }
+django_outbox = { path = "../vendor/django_outbox", develop = true }
 
 
 [build-system]

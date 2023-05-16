@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # 'outbox.apps.NewOutboxConfig',
+    'django_outbox.apps.NewDjangoOutboxConfig',
 ]
 
 MIDDLEWARE = [

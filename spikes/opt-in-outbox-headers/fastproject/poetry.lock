@@ -61,14 +61,14 @@ category = "main"
 optional = false
 python-versions = "^3.10"
 files = []
-develop = false
+develop = true
 
 [package.dependencies]
 Django = "^4.2.1"
 
 [package.source]
 type = "directory"
-url = "../vendor/django-outbox"
+url = "../vendor/django_outbox"
 
 [[package]]
 name = "django-tof"
@@ -140,4 +140,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "82185efafafdccb66566c7edfbe272c0b880539f09b6cdf887655a397d18a69a"
+content-hash = "542e59e036df38bd32f7242a2916c306070570c131480063b7fbf020e61451da"
