@@ -1,0 +1,4 @@
+source_up
+
+export DATABASE_URL=${DATABASE_SCHEMA_USER_PASSWORD_HOST_PORT}/slowproject
+
